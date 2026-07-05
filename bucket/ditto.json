@@ -1,0 +1,39 @@
+{
+    "version": "3_25_69_0",
+    "description": "An enhanced clipboard manager",
+    "homepage": "https://ditto-cp.sourceforge.io",
+    "license": "GPL-3.0-only",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/sabrogden/Ditto/releases/download/nightly/DittoPortable_3_25_69_0.zip",
+            "hash": "6ccf38ab1fc3f7b582ddbe32b599a8d26d1647d5f0e56faa0965aec16caff03b"
+        }
+    },
+    "extract_dir": "Ditto",
+    "pre_install": [
+        "if (!(Test-Path \"$persist_dir\\Ditto.Settings\")) { New-Item \"$dir\\Ditto.Settings\" -Value \"[Ditto]`nDBPath3=Ditto.db\" | Out-Null }",
+        "if (!(Test-Path \"$persist_dir\\Ditto.db\")) {",
+        "    Write-Host 'File Ditto.db does not exists. Creating.' -f Yellow",
+        "    Start-Process \"$dir\\Ditto.exe\"",
+        "    Start-Sleep -Milliseconds 500",
+        "    Start-Process \"$dir\\Ditto.exe\" /exit",
+        "}"
+    ],
+    "bin": "Ditto.exe",
+    "shortcuts": [
+        [
+            "Ditto.exe",
+            "Ditto"
+        ]
+    ],
+    "persist": [
+        "Ditto.Settings",
+        "Themes/Dracula.xml"
+    ],
+    "checkver": {
+        "url": "https://api.github.com/repos/sabrogden/Ditto/releases",
+        "jsonpath": "$[0].assets[?(@.name =~ /DittoPortable_/i)]",
+        "regex": "\"name\":\\s*\"DittoPortable_(?<ver>[^\"_]+)",
+        "replace": "${ver}"
+    }
+}
