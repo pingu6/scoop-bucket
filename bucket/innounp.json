@@ -11,6 +11,6 @@
         "regex": "(?s)What's new/History.*?<b>(\\d+(?:\\.\\d+){2})</b>"
     },
     "autoupdate": {
-        "url": "https://raw.githubusercontent.com/jrathlev/InnoUnpacker-Windows-GUI/refs/heads/master/innounp-2/bin/innounp-2.zip"
+        "url": "https://raw.githubusercontent.com/jrathlev/InnoUnpacker-Windows-GUI/refs/heads/master/innounp-$majorVersion/bin/innounp-$majorVersion.zip"
     }
 }
