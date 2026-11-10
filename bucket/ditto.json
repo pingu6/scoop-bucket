@@ -1,22 +1,30 @@
 {
-    "version": "3_25_69_0",
+    "version": "3.25.113.0",
     "description": "An enhanced clipboard manager",
     "homepage": "https://ditto-cp.sourceforge.io",
     "license": "GPL-3.0-only",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/sabrogden/Ditto/releases/download/nightly/DittoPortable_3_25_69_0.zip",
-            "hash": "6ccf38ab1fc3f7b582ddbe32b599a8d26d1647d5f0e56faa0965aec16caff03b"
+            "url": "https://github.com/sabrogden/Ditto/releases/download/3.25.113.0/DittoPortable_3_25_113_0.zip",
+            "hash": "c21dc05f27f744813e0f19d2d20842546baea160ab366382548aa283e2636216"
         }
     },
     "extract_dir": "Ditto",
     "pre_install": [
-        "if (!(Test-Path \"$persist_dir\\Ditto.Settings\")) { New-Item \"$dir\\Ditto.Settings\" -Value \"[Ditto]`nDBPath3=Ditto.db\" | Out-Null }",
         "if (!(Test-Path \"$persist_dir\\Ditto.db\")) {",
         "    Write-Host 'File Ditto.db does not exists. Creating.' -f Yellow",
-        "    Start-Process \"$dir\\Ditto.exe\"",
-        "    Start-Sleep -Milliseconds 500",
-        "    Start-Process \"$dir\\Ditto.exe\" /exit",
+        "    Start-Process -FilePath \"$dir\\Ditto.exe\"",
+        "    while (!(Test-Path \"$dir\\Ditto.db\")) {",
+        "        Start-Sleep -Milliseconds 500",
+        "    }",
+        "    Start-Sleep 1",
+        "    Stop-Process -Name Ditto",
+        "}",
+        "$file = 'Ditto.Settings'",
+        "if (!(Test-Path \"$persist_dir\\$file\")) {",
+        "    Write-Host 'File' $file 'does not exists. Creating.' -f Yellow",
+        "    $CONT = @('[Ditto]', 'DBPath3=Ditto.db')",
+        "    Set-Content \"$dir\\$file\" ($CONT -join \"`r`n\") -Encoding Ascii",
         "}"
     ],
     "bin": "Ditto.exe",
@@ -27,13 +35,17 @@
         ]
     ],
     "persist": [
-        "Ditto.Settings",
-        "Themes/Dracula.xml"
+        "Ditto.db",
+        "Ditto.Settings"
     ],
     "checkver": {
-        "url": "https://api.github.com/repos/sabrogden/Ditto/releases",
-        "jsonpath": "$[0].assets[?(@.name =~ /DittoPortable_/i)]",
-        "regex": "\"name\":\\s*\"DittoPortable_(?<ver>[^\"_]+)",
-        "replace": "${ver}"
+        "github": "https://github.com/sabrogden/Ditto"
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/sabrogden/Ditto/releases/download/$version/DittoPortable_$underscoreVersion.zip"
+            }
+        }
     }
 }
