@@ -34,24 +34,34 @@
         "    info \"Restoring system-level config from $config_path_persisted...\"",
         "    Copy-Item -Path $config_path_persisted -Destination $config_path -Force",
         "    info \"Adjusting paths in $config_path...\"",
-        "    (Get-Content -Path $config_path -Encoding UTF8) -replace '(?<=git/)[\\d.]+(?=/)', $version | Set-Content -Path $config_path -Encoding UTF8",
+        "    $content = [System.IO.File]::ReadAllText($config_path)",
+        "    $git_dir_pattern = [regex]::Escape(((Split-Path -Path $dir -Parent) -replace '\\\\', '/'))",
+        "    $content = $content -replace \"(${git_dir_pattern}/)[\\d.]+(?=/)\", \"`${1}$version\"",
+        "    $runtime_dir = @('ucrt64', 'clangarm64', 'mingw64') | Where-Object { Test-Path -LiteralPath (Join-Path -Path $dir -ChildPath $_) -PathType Container } | Select-Object -First 1",
+        "    if ($runtime_dir) {",
+        "        $version_pattern = [regex]::Escape($version)",
+        "        $content = $content -replace \"(${git_dir_pattern}/(?:${version_pattern}|current)/)(?:mingw64|ucrt64|clangarm64)(?=/)\", \"`${1}$runtime_dir\"",
+        "    }",
+        "    [System.IO.File]::WriteAllText($config_path, $content, [System.Text.UTF8Encoding]::new($false))",
         "}"
     ],
     "post_install": [
         "$git_path = $dir -replace '\\\\', '\\\\'",
-        "Get-ChildItem -Path \"$bucketsdir\\$bucket\\scripts\\$app\" -Filter '*.reg' -File | ForEach-Object {",
+        "Get-ChildItem -Path \"$bucketsdir\\main\\scripts\\$app\" -Filter '*.reg' -File | ForEach-Object {",
         "    $content = Get-Content -Path $_.FullName -Encoding utf8",
         "    if ($global) { $content = $content -replace 'HKEY_CURRENT_USER', 'HKEY_LOCAL_MACHINE' }",
         "    $content -replace '{{git_dir}}', $git_path | Set-Content -Path \"$dir\\$($_.Name)\" -Encoding unicode",
         "}"
     ],
-    "env_add_path": "cmd",
     "env_set": {
         "GIT_INSTALL_ROOT": "$dir"
     },
     "bin": [
         "bin\\sh.exe",
-        "bin\\git.exe",
+        "cmd\\git.exe",
+        "cmd\\gitk.exe",
+        "cmd\\git-gui.exe",
+        "cmd\\scalar.exe",
         "git-bash.exe",
         "usr\\bin\\gpg.exe",
         "usr\\bin\\gpg-agent.exe",
